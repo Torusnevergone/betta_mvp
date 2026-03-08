@@ -1,0 +1,84 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BettaFish 舆情分析系统</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f5f7f9; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        /* 新增聊天历史区样式 */
+        #chat-history { max-height: 60vh; overflow-y: auto; margin-bottom: 20px; padding: 10px; border: 1px solid #eee; border-radius: 6px; background: #fafafa; }
+        .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 8px; line-height: 1.5; }
+        .msg-user { background: #3498db; color: white; margin-left: 20%; border-bottom-right-radius: 0; }
+        .msg-bot { background: white; color: #333; margin-right: 10%; border: 1px solid #ddd; border-bottom-left-radius: 0; }
+        
+        .input-group { display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 24px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        .typing::after { content: '▌'; animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐟 BettaFish 舆情分析</h1>
+        <!-- 聊天记录展示区 -->
+        <div id="chat-history"></div>
+        
+        <div class="input-group">
+            <input type="text" id="topic-input" placeholder="输入话题或追问，如：那对比极氪007呢？" onkeypress="handleEnter(event)">
+            <button id="search-btn" onclick="startAnalysis()">发送</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // 生成一个随机的 session_id，代表当前用户的这一场对话
+        const sessionId = Math.random().toString(36).substring(2, 15);
+        let eventSource = null;
+        function handleEnter(e) { if (e.key === 'Enter') startAnalysis(); }
+        function startAnalysis() {
+            const topic = document.getElementById('topic-input').value.trim();
+            if (!topic) return;
+            const btn = document.getElementById('search-btn');
+            const historyDiv = document.getElementById('chat-history');
+            // 1. 把用户的问题添加到界面上
+            historyDiv.innerHTML += `<div class="message msg-user"><strong>我：</strong> ${topic}</div>`;
+            document.getElementById('topic-input').value = ""; // 清空输入框
+            
+            // 2. 创建一个空的机器人回复框，准备接收流式数据
+            const botMsgId = "bot-msg-" + Date.now();
+            historyDiv.innerHTML += `<div class="message msg-bot typing" id="${botMsgId}">🤖 探员们正在开会，请稍候...</div>`;
+            historyDiv.scrollTop = historyDiv.scrollHeight;
+            btn.disabled = true;
+            if (eventSource) eventSource.close();
+            let fullMarkdown = "";
+            const botDiv = document.getElementById(botMsgId);
+            // 注意：API 请求带上了 session_id
+            eventSource = new EventSource(`/api/analyze?topic=${encodeURIComponent(topic)}&session_id=${sessionId}`);
+            eventSource.onmessage = function(event) {
+                const text = event.data.replace(/\\n/g, '\n');
+                
+                if (text === "[DONE]") {
+                    eventSource.close();
+                    btn.disabled = false;
+                    botDiv.classList.remove("typing");
+                    return;
+                }
+                fullMarkdown += text;
+                botDiv.innerHTML = marked.parse(fullMarkdown);
+                historyDiv.scrollTop = historyDiv.scrollHeight;
+            };
+            eventSource.onerror = function(err) {
+                eventSource.close();
+                btn.disabled = false;
+                botDiv.classList.remove("typing");
+                botDiv.innerHTML += "<br><span style='color:red;'>❌ 连接中断。</span>";
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+
+.venv/
+__pycache__/
+*.db
+*.md
+.env
+
+models/
+lora_weights/
+*.bin
+*.safetensors
+*.pt
