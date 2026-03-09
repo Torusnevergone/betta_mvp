@@ -68,7 +68,9 @@ class WebSearchTool(BaseTool):
                     url = r.get("href", "")
 
                     # 1.组装给LLM砍的文本，只给它看标题和摘要，省token
-                    llm_readable_results.append(f"[结果{i+1}]标题：{title}\n摘要：{snippet}")
+                    # llm_readable_results.append(f"[结果{i+1}]标题：{title}\n摘要：{snippet}")
+                    # 加入真实media_agent后，需要把url传给llm，从而传给爬虫工具
+                    llm_readable_results.append(f"[结果{i+1}]\n标题：{title}\n链接：{url}\n摘要：{snippet}")
                     # 2.行业规范：旁路存储 旁路写入state
                     if state:
                         state.add_source(title=title, url=url)
