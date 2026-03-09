@@ -41,7 +41,12 @@ class WebScraperTool(BaseTool):
                 page = context.new_page()
                 
                 # 设置超时时间为 15 秒，等待网络空闲
-                page.goto(url, timeout=15000, wait_until="networkidle")
+                # page.goto(url, timeout=15000, wait_until="networkidle")
+                # 【优化1】：将超时时间延长到 20 秒，并且只要 DOM 加载完就算成功
+                page.goto(url, timeout=20000, wait_until="domcontentloaded")
+                # 【优化2】：稍微等 1 秒，让一些简单的 JS 渲染一下内容
+                page.wait_for_timeout(1000)
+
                 
                 # 获取渲染后的完整 HTML
                 html_content = page.content()
