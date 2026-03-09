@@ -33,24 +33,37 @@ class WebScraperTool(BaseTool):
         try:
             with sync_playwright() as p:
                 # 启动 Chromium，headless=True 表示不弹出真实浏览器窗口
-                browser = p.chromium.launch(headless=True)
+                # 尝试修正gpu参数，不启用gpu
+                # browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=[
+                        '--no-sandbox',
+                        '--disable-dev-shm-usage',
+                        '--disable-gpu',               # <--- 加上这个
+                        '--disable-software-rasterizer' # <--- 加上这个
+                    ]
+                )
                 # 伪装成正常的手机/电脑浏览器，防止被简单的反爬拦截
                 context = browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 )
                 page = context.new_page()
                 
-                # 设置超时时间为 15 秒，等待网络空闲
-                # page.goto(url, timeout=15000, wait_until="networkidle")
-                # 【优化1】：将超时时间延长到 20 秒，并且只要 DOM 加载完就算成功
-                page.goto(url, timeout=20000, wait_until="domcontentloaded")
-                # 【优化2】：稍微等 1 秒，让一些简单的 JS 渲染一下内容
-                page.wait_for_timeout(1000)
-
+                try:
+                    # 设置超时时间为 15 秒，等待网络空闲
+                    # page.goto(url, timeout=15000, wait_until="networkidle")
+                    # 【优化1】：将超时时间延长到 20 秒，并且只要 DOM 加载完就算成功
+                    page.goto(url, timeout=20000, wait_until="domcontentloaded")
+                    # 【优化2】：稍微等 1 秒，让一些简单的 JS 渲染一下内容
+                    page.wait_for_timeout(1000)
                 
-                # 获取渲染后的完整 HTML
-                html_content = page.content()
-                browser.close()
+                    # 获取渲染后的完整 HTML
+                    html_content = page.content()
+                except Exception as e:
+                    return f"抓取失败: 目标网页存在反爬或加载超时 ({str(e)})"
+
+                    browser.close()
             # 使用 BeautifulSoup 解析 HTML
             soup = BeautifulSoup(html_content, 'html.parser')
             # 1. 提取网页标题
