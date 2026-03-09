@@ -1,4 +1,3 @@
-# app/core/config.py
 from __future__ import annotations
 from dataclasses import dataclass
 import os
@@ -8,16 +7,9 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class Settings:
-    # --- 原有的文本模型配置 ---
     llm_base_url: str = os.getenv("LLM_BASE_URL","https://api.deepseek.com")
     llm_api_key: str = os.getenv("LLM_API_KEY","")
     llm_model: str = os.getenv("LLM_MODEL","deepseek-chat")
-    
-    # --- 新增的视觉模型配置 ---
-    vision_base_url: str = os.getenv("VISION_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-    vision_api_key: str = os.getenv("VISION_API_KEY", "")
-    vision_model: str = os.getenv("VISION_MODEL", "qwen-vl-max")
-    
     llm_timeout_s: float = float(os.getenv("LLM_TIMEOUT_s", "60"))
 
 def get_settings() -> Settings:

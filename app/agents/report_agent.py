@@ -124,3 +124,22 @@ class ReportAgent(BaseAgent):
         for chunk in self.llm.chat_stream(messages=messages, tools=None):
             if chunk is not None and str(chunk) != "":
                 yield str(chunk)
+
+        # 【新增修复】：在大模型输出完正文后，我们手动用 Python 把来源链接拼接成 Markdown 格式并流式吐出去
+        try:
+            data_dict = json.loads(structured_data)
+            sources = data_dict.get("sources", [])
+            if sources:
+                yield "\n\n---\n### 参考信息来源\n"
+                # 使用 set 去重，防止同一个网页被搜到多次
+                unique_urls = set()
+                source_idx = 1
+                for s in sources:
+                    url = s.get('url', '')
+                    if url and url not in unique_urls:
+                        unique_urls.add(url)
+                        title = s.get('title', '未知网页')
+                        yield f"{source_idx}. [{title}]({url})\n"
+                        source_idx += 1
+        except Exception as e:
+            logger.error(f"拼接来源链接时出错: {e}")

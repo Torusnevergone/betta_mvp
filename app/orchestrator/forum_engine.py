@@ -75,7 +75,9 @@ class ForumEngine:
             evidence_results["query"] = self.query_agent.chat(prompt, state=state)
         def fetch_media():
             # prompt = f"请帮我搜集关于话题：【{topic}】的短视频平台最新情报。"
-            prompt = f"{history_text}请结合上述上下文，帮我搜集关于最新话题：【{topic}】的短视频平台情报。"
+            # prompt = f"{history_text}请结合上述上下文，帮我搜集关于最新话题：【{topic}】的短视频平台情报。"
+            # 稍微改一下 prompt，引导它去搜包含图片的网页
+            prompt = f"{history_text}请结合上述上下文，帮我搜集关于最新话题：【{topic}】的现场图片报道或短视频平台情报，请务必找到图片并分析画面。"
             evidence_results["media"] = self.media_agent.chat(prompt, state=state)
 
         # 创建并启动线程

@@ -33,6 +33,12 @@ init_db()
 def read_root():
     return render_template("index.html")
 
+# app/main.py
+@app.route('/favicon.ico')
+def favicon():
+    # 直接返回 204 No Content，告诉浏览器没有图标
+    return '', 204
+
 # 加入独立部署的LoRA情感分析API路由
 @app.route("/api/sentiment", methods=["POST"])
 def predict_sentiment_api():
