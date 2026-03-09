@@ -19,7 +19,7 @@ class InsightAgent(BaseAgent):
             "{\n"
             '  "summary": "一到两句话的高度概括",\n'
             '  "sentiment": "正面/负面/中立/争议 (请附上模型返回的置信度，如：负面，置信度92.5%)",\n'
-            '  "key_points": ["要点1", "要点2", "要点3"],\n'
+            '  "key_points": ["要点1", "要点2", "要点3"]\n'
             "}"
         )
 

@@ -6,6 +6,7 @@ from app.tools.base import BaseTool
 from app.core.llm_client import LLMClient
 from app.core.state import SessionState
 from app.core.logging import setup_logger
+from app.core.types import Message
 logger = setup_logger()
 class VisionAnalysisTool(BaseTool):
     """
@@ -38,10 +39,10 @@ class VisionAnalysisTool(BaseTool):
         logger.info(f"[Vision Tool] 正在请求视觉模型分析图片: {image_url}")
         # 构造通义千问-VL / GPT-4o 兼容的视觉消息格式
         # 注意：这里的 content 是一个列表，包含 text 和 image_url
-        messages = [
-            {
-                "role": "user",
-                "content": [
+        # 将python原生字典改为Message对象
+        messages = [Message(
+                role="user",
+                content=[
                     {
                         "type": "text",
                         "text": "你是一个专业的舆情图像分析师。请详细描述这张图片的内容。如果图片中包含文字（如截图、公告）、车辆损坏情况（如碰撞、起火）、或者人物情绪，请务必详细提取并描述。不要进行主观猜测，只描述客观事实。"
@@ -53,8 +54,7 @@ class VisionAnalysisTool(BaseTool):
                         }
                     }
                 ]
-            }
-        ]
+            )]
         try:
             # 核心：调用 LLMClient，并且务必设置 use_vision=True ！
             # 核心：使用自己身上保存的 llm_client 实例去发起请求，并指定 use_vision=True

@@ -77,9 +77,11 @@ class WebScraperTool(BaseTool):
             # 3. 提取图片链接 (寻找 <img> 标签)
             image_urls = []
             for img in soup.find_all('img'):
-                src = img.get('src')
-                # 过滤掉头像、小图标，尽量只保留大图
-                if src and src.startswith("http") and not any(x in src for x in ['avatar', 'icon', 'logo', 'gif']):
+                # src = img.get('src')
+                # 加入修复：防止抓不到图片，检查多种可能的真实图片地址属性 (适配懒加载)
+                src = img.get('src') or img.get('data-src') or img.get('data-original') or img.get('data-lazy-src')
+                # 过滤掉头像、小图标，尽量只保留大图，这里加了一个base64
+                if src and src.startswith("http") and not any(x in src for x in ['avatar', 'icon', 'logo', 'gif', 'base64']):
                     image_urls.append(src)
             
             # 只取前 2 张最具代表性的图片，避免调用视觉API太贵/太慢

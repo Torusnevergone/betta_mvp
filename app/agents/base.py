@@ -32,7 +32,7 @@ class BaseAgent:
         messages.append(Message(role="user",content=user_input))
         # logger.info(f"[{self.name}]正在思考...")
         # 真正的agent循环（解决llm认为工具调用不充足，多次调用工具的问题）
-        max_iterations = 3 # 最多允许它连续调用3次工具
+        max_iterations = 5 # 最多允许它连续调用3次工具
 
         for i in range(max_iterations):
             logger.info(f"[{self.name}]第{i+1}轮思考中...")

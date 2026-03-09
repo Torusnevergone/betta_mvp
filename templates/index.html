@@ -39,8 +39,11 @@
             <button id="search-btn" onclick="startAnalysis()">发送</button>
         </div>
     </div>
-    <script src="https://cdn.staticfile.org/echarts/5.5.0/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script> -->
+    <!-- 请替换为下面这两行： -->
+    <script src="https://cdn.staticfile.net/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdn.staticfile.net/echarts/5.4.3/echarts.min.js"></script>
     <script>
         // 生成一个随机的 session_id，代表当前用户的这一场对话
         const sessionId = Math.random().toString(36).substring(2, 15);
